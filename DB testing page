@@ -1,0 +1,25 @@
+//on DB.test page
+const knex = require('knex')
+const testConfig = require('../db/knexfile').test
+const testDB = knex(testConfig)
+
+const db = require('../db')
+
+beforeAll(() => testDB.migrate.latest())
+
+beforeEach(() => testDB.seed.run())
+
+afterAll(() => testDB.destroy())
+
+test('READ: db.getAllLocations gets them all', async () => {
+  const locations = await db.getAllLocations(testDB)
+  const expected = {
+    id: 4,
+    name: 'Kombucha Karavan',
+    description: 'Whet your whistle with some yummy living organisms.',
+  }
+
+  expect(locations).toHaveLength(4)
+
+  expect(locations[3]).toEqual(expected)
+})
