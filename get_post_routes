@@ -1,0 +1,154 @@
+
+
+//////////////////////////////////////////////////////////// 
+ // GETTING ALL LOCATIONS   
+ 
+    db.getAllLocations()
+    .then((locations) => {
+      res.render('showLocations', { locations })
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+
+// Get all locations function from DB file
+function getAllLocations(db = connection) {
+    return db('locations').select()
+  }
+
+
+//////////////////////////////////////////////////////////// 
+ // GETTING LOCATION BY ID - 'edit location being the view we want to present'
+router.get('/:id/edit', (req, res) => {
+  const id = Number(req.params.id)
+
+  db.getLocationById(id)
+    .then((loc) => {
+      res.render('editLocation', loc)
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+})
+
+
+// Get all locations function from DB file  NB 'locations is the name of the DB'
+function getLocationById(id, db = connection) {
+    return db('locations').select().where({ id }).first()
+  }
+
+/////////////////////////////////////////////////////////////////
+// ADDING A LOCATION using a function stored in the database file
+
+router.get('/add', (req, res) => {
+    res.render('addLocation')
+  })
+  
+  router.post('/add', (req, res) => {
+    db.addLocation(req.body)
+      .then(() => {
+        res.redirect('/locations')
+      })
+      .catch((err) => {
+        res.status(500).send(err.message)
+      })
+  })
+  
+  // add location function from DB file
+  function addLocation(location, db = connection) {
+      return db('locations').insert(location)
+    }
+
+
+  // add location view page
+    {{> locationsNav}}
+
+<h2>add new location</h2>
+
+<form method="POST" action="/locations/add" class="form">
+
+  <label for="name">Location name</label>
+  <input type="text" id="name" name="name" placeholder="Location name">
+  
+  <label for="description">Description</label>
+  <textarea rows="4" id="description" name="description" placeholder="Location description"></textarea>
+  
+  <div></div>
+  <button>Add new location</button>
+</form>
+  
+  
+  
+   //////////////////////////////////////////////////////////// 
+   // DELETING A LOCATION - no get required, but do need to pass the id through and redirect to another webpage address. 
+  
+   router.post('/delete', (req, res) => {
+      const id = Number(req.body.id)
+      db.deleteLocation(id)
+        .then(() => {
+          res.redirect('/locations')
+        })
+        .catch((err) => {
+          res.status(500).send(err.message)
+        })
+    })
+  
+  // delete location function from DB file
+    function deleteLocation(id, db = connection) {
+      return db('locations').del().where({ id })}
+ .
+      
+
+//////////////////////////////////////////////////////////// 
+   // GETTING EVENTS BY DAY - where we are looking at a specific key within the dB object i.e. day
+   //NB: because we are joing two databases (events and locations) there are conflicts in the data i.e same key names. 
+   // so to fix this we name the object as a variable we want to refer to. e.g. locations.name is the key value in the locations DB. 
+   // we will refer to this as locationName in the route.  
+
+   router.get('/:day', (req, res) => {
+    const day = validateDay(req.params.day)
+    db.getEventsByDay(day)
+      .then((events) => {
+        res.render('showDay', { day, events })
+      })
+      .catch((err) => {
+        res.status(500).send(err.message)
+      })
+      })
+
+  //  function from DB file
+      function getEventsByDay(day, db = connection) {
+        return db('events')
+          .select(
+            '*',
+            'locations.name AS locationName',
+            'events.name AS eventName',
+            'events.id',
+            'events.description'
+          )
+          .where({ day })
+          .join('locations', 'locations.id', 'events.location_id')
+      }
+
+
+  // showday view and how the data is pulled through using handlebars.
+      {{> lineUpNav}}
+
+    <h2>events: <span class="data">{{day}}</span></h2>
+    <a class="nav" href="/events/add/{{day}}">add event</a>
+
+    <ul class="cards">
+    {{#each events}}
+    <li class="card">
+        <div class="event">
+        <span class="title">{{eventName}}</span>
+        <div class="time-location">
+            <p>Location: <span class="data">{{locationName}}</span></p>
+            <p>Time: <span class="data">{{time}}</span></p>
+        </div>
+        </div>
+        <p class="event-description data">{{description}}</p>
+        <a href="/events/{{id}}/edit">edit event</a>
+    </li>
+    {{/each}}
+    </ul>
