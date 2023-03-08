@@ -1,0 +1,313 @@
+// ON THE DATABASE PAGE
+
+const environment = process.env.NODE_ENV || 'development'
+const config = require('./knexfile')[environment]
+const connection = require('knex')(config)
+
+module.exports = {
+  getAllLocations,
+  getEventsByDay,
+  getEventById,
+  getLocationById,
+  updateLocation,
+  addNewEvent,
+  deleteEvent,
+  updateEvent,
+  addLocation,
+  deleteLocation,
+}
+
+function getAllLocations(db = connection) {
+  // TODO: use knex to get the real location data from the database
+  return db('locations').select()
+}
+
+function getEventsByDay(day, db = connection) {
+  return db('events')
+    .select(
+      '*',
+      'locations.name AS locationName',
+      'events.name AS eventName',
+      'events.id',
+      'events.description'
+    )
+    .where({ day })
+    .join('locations', 'locations.id', 'events.location_id')
+}
+
+function getLocationById(id, db = connection) {
+  return db('locations').select().where({ id }).first()
+}
+
+function updateLocation(updatedLocation, db = connection) {
+  return db('locations')
+    .update(updatedLocation)
+    .where({ id: updatedLocation.id })
+}
+
+function addNewEvent(event, db = connection) {
+  return db('events').insert(event)
+}
+
+function deleteEvent(id, db = connection) {
+  return db('events').del().where({ id })
+}
+
+function getEventById(id, db = connection) {
+  return db('events').first().where({ id })
+}
+
+function updateEvent(event, db = connection) {
+  return db('events').update(event).where({ id: event.id })
+}
+
+function addLocation(location, db = connection) {
+  return db('locations').insert(location)
+}
+
+function deleteLocation(id, db = connection) {
+  return db('locations').del().where({ id })}
+
+
+
+
+ ///////////////////////////
+// ON THE EVENTS ROUTES PAGE
+//////////////////////////
+
+const express = require('express')
+
+const { eventDays, capitalise, validateDay } = require('./helpers')
+const db = require('../db')
+
+const router = express.Router()
+module.exports = router
+
+// GET /events/add/friday
+router.get('/add/:day', (req, res) => {
+  const day = validateDay(req.params.day)
+  const days = eventDays.map((eventDay) => ({
+    value: eventDay,
+    name: capitalise(eventDay),
+    selected: eventDay === day ? 'selected' : '',
+  }))
+
+  // TODO: Replace this with all of the locations in the database
+  // const locations = [
+  //   {
+  //     id: 1,
+  //     name: 'TangleStage',
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'Yella Yurt',
+  //   },
+  // ]
+  db.getAllLocations()
+    .then((locations) => {
+      res.render('addEvent', { locations, days, day })
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+})
+
+// POST /events/add
+router.post('/add', (req, res) => {
+  // ASSISTANCE: So you know what's being posted ;)
+  const { name, description, time, locationId } = req.body
+  const day = validateDay(req.body.day)
+
+  // TODO: Add the event to the database and then redirect
+
+  db.addNewEvent({ location_id: locationId, day, time, name, description })
+    .then(() => {
+      res.redirect(`/schedule/${day}`)
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+})
+
+// POST /events/delete
+router.post('/delete', (req, res) => {
+  const id = Number(req.body.id)
+  const day = validateDay(req.body.day)
+
+  // TODO: Delete the event from the database using its id
+
+  db.deleteEvent(id)
+    .then(() => {
+      res.redirect(`/schedule/${day}`)
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+})
+
+// GET /events/3/edit
+router.get('/:id/edit', (req, res) => {
+  const id = Number(req.params.id)
+
+  // TODO: Replace event below with the event from the database using its id
+  // NOTE: It should have the same shape as this one
+  // const event = {
+  //   id: id,
+  //   locationId: 1,
+  //   day: 'friday',
+  //   time: '2pm - 3pm',
+  //   name: 'Slushie Apocalypse I',
+  //   description:
+  //     'This is totally a description of this really awesome event that will be taking place during this festival at the Yella Yurt. Be sure to not miss the free slushies cause they are rad!',
+  // }
+  Promise.all([db.getEventById(id), db.getAllLocations()])
+    .then(([event, locations]) => {
+      locations = locations.map(({ id, name }) => ({
+        id,
+        name,
+        selected: id === event.location_id ? 'selected' : '',
+      }))
+      // This is done for you
+      const days = eventDays.map((eventDay) => ({
+        value: eventDay,
+        name: capitalise(eventDay),
+        selected: eventDay === event.day ? 'selected' : '',
+      }))
+
+      const viewData = { event, locations, days }
+      res.render('editEvent', viewData)
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+
+  // TODO: Replace locations below with all of the locations from the database
+  // NOTE: The objects should have the same shape as these.
+  // The selected property should have a value of
+  // either 'selected' or '' based on event.locationId above.
+  // const locations = [
+  //   { id: 1, name: 'TangleStage', selected: '' },
+  //   { id: 2, name: 'Yella Yurt', selected: 'selected' },
+  //   { id: 3, name: 'Puffy Paddock', selected: '' },
+  //   { id: 4, name: 'Kombucha Karavan', selected: '' },
+  // ]
+})
+
+// POST /events/edit
+router.post('/edit', (req, res) => {
+  // ASSISTANCE: So you know what's being posted ;)
+  const { name, description, time } = req.body
+  const id = Number(req.body.id)
+  const day = validateDay(req.body.day)
+  const locationId = Number(req.body.locationId)
+
+  // TODO: Update the event in the database using the identifiers created above
+
+  db.updateEvent({ name, description, time, id, day, location_id: locationId })
+    .then(() => {
+      res.redirect(`/schedule/${day}`)
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+})
+
+
+
+ ///////////////////////////
+// ON THE LOCATIONS ROUTES PAGE
+//////////////////////////
+
+const express = require('express')
+
+const db = require('../db')
+
+const router = express.Router()
+module.exports = router
+
+// GET /locations
+router.get('/', (req, res) => {
+  // TODO: Replace this with all of the locations in the database
+  // const locations = [
+  //   {
+  //     id: 1,
+  //     name: 'TangleStage',
+  //     description:
+  //       'Not the biggest stage, but perhaps the most hip. Not the biggest stage, but perhaps the most hip. Not the biggest stage, but perhaps the most hip.',
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'Yella Yurt',
+  //     description:
+  //       "It's a freakin' yurt! Get in here! It's a freakin' yurt! Get in here! It's a freakin' yurt! Get in here! It's a freakin' yurt! Get in here!",
+  //   },
+  // ]
+  db.getAllLocations()
+    .then((locations) => {
+      res.render('showLocations', { locations })
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+})
+
+// GET /locations/4/edit
+router.get('/:id/edit', (req, res) => {
+  const id = Number(req.params.id)
+
+  // TODO: Get the location based on its id and replace this viewData
+  // const viewData = {
+  //   id: id,
+  //   name: 'TangleStage',
+  //   description:
+  //     'Not the biggest stage, but perhaps the most hip. Not the biggest stage, but perhaps the most hip. Not the biggest stage, but perhaps the most hip.',
+  // }
+  db.getLocationById(id)
+    .then((loc) => {
+      res.render('editLocation', loc)
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+})
+
+// POST /locations/edit
+router.post('/edit', (req, res) => {
+  db.updateLocation(req.body)
+    .then(() => {
+      res.redirect('/locations')
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+
+  // ASSISTANCE: So you know what's being posted ;)
+  // const { id, name, description } = req.body
+
+  // TODO: Update the location in the database based on its id
+})
+
+router.get('/add', (req, res) => {
+  res.render('addLocation')
+})
+
+router.post('/add', (req, res) => {
+  db.addLocation(req.body)
+    .then(() => {
+      res.redirect('/locations')
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+})
+
+router.post('/delete', (req, res) => {
+  const id = Number(req.body.id)
+  db.deleteLocation(id)
+    .then(() => {
+      res.redirect('/locations')
+    })
+    .catch((err) => {
+      res.status(500).send(err.message)
+    })
+})
