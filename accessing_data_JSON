@@ -1,0 +1,28 @@
+
+//Server.Route
+You can create an object within a server.get function. So you can render that information on the page. 
+e.g. 
+
+server.get('/artwork/:id', (req, res) => {
+  let id = Number(req.params.id)
+  const selectedArt = art.find((element) => element.id === id)
+
+  
+
+  const data = {
+    title: 'Artworks',
+    artists: selectedArt,
+  }
+  const template = 'artworks'
+  res.render(template, data)
+})
+
+
+Using req.params is a way of accessing your data file. We can do that because we require the file at the start of the server file. 
+const art = require('./data/art.json')
+In this line: const selectedArt = art.find((element) => element.id === id)
+art= the const variable we created to access the json file. 
+
+
+//decontructed example of above
+  // const selectedArt = art.finc((selectedArt.id === Number(req.params.id)))
