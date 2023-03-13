@@ -23,3 +23,102 @@ test('READ: db.getAllLocations gets them all', async () => {
 
   expect(locations[3]).toEqual(expected)
 })
+
+
+////////////////////////
+//test-utils.js (is required in the test JS file below)
+
+const { within } = require('@testing-library/dom')
+const { JSDOM } = require('jsdom')
+
+const render = (response) => {
+  const { document } = new JSDOM(response.text).window
+  return within(document)
+}
+
+module.exports = { render }
+
+
+////////////////
+//server-test.js
+
+const { render } = require('./test-utils')
+require('@testing-library/jest-dom')
+
+const request = require('supertest')
+const server = require('./server')
+
+test('up and running', () => {
+  expect(1).toBeTruthy()
+})
+
+describe('Our home page', () => {
+  it('contains the word "Welcome"', () => {
+    return request(server)
+      .get('/')
+      .then((res) => {
+        const screen = render(res)
+        const greeting = screen.getByText(/Welcome/)
+        expect(greeting).toBeInTheDocument()
+        expect(greeting).toBeVisible()
+      })
+  })
+  
+  it('has a heading', () => {
+    return request(server)
+      .get('/')
+      .then(res => {
+        const fakeScreen = render(res)
+        const headings = fakeScreen.getAllByRole('heading')
+  
+        expect(res.statusCode).toBe(200)
+        expect(headings).toHaveLength(2)
+        expect(headings[0]).toHaveTextContent(/our cool site/) 
+      })
+  })
+
+  it('has a link to the about page', () => {
+    return request(server).get('/')
+      .then((res) => {
+        const screen = render(res)
+
+        const aboutLink = screen.getByRole('link', { name: 'About' })
+
+        expect(aboutLink).toBeInTheDocument()
+        expect(aboutLink).toBeVisible()
+
+        // expect(aboutLink.href).toBe('/about')
+        expect(aboutLink).toHaveAttribute('href', '/about')
+      })
+  })
+
+  it('includes an image of a corgi', () => {
+    return request(server).get('/')
+      .then((res) => {
+        const screen = render(res)
+
+        const image = screen.getByAltText(/corgi/)
+
+        expect(image).toBeInTheDocument()
+        expect(image).toBeVisible()
+
+        // expect(image.src).toBe('/corgiSmile.jpg')
+        expect(image).toHaveAttribute('src', '/corgiSmile.jpg')
+      })
+  })
+})
+
+describe('GET /dogs', () => {
+  it('has some dogs', () => {
+    return request(server)
+      .get('/dogs')
+      .then(res => {
+        const screen = render(res)
+        const dogs = screen.getAllByRole('listitem')
+  
+        expect(dogs).toHaveLength(7) // <-- oh no! currently failing. Why would that be? ;)
+      })
+  })
+})
+
+
