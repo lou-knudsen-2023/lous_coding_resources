@@ -1,0 +1,71 @@
+
+
+import data from '../data/data'
+import AnimalSingle from './AnimalSingle'
+
+// import { useState } from 'react'
+
+
+function TheFarm() {
+  // console.log(data)
+
+  return (
+    <>
+      {data.animals.map(thing => {
+        return <AnimalSingle key={thing.id}  singleAnimal={thing} />
+      })}
+    </>
+  )
+}
+
+export default TheFarm
+
+
+
+
+///import file ////
+
+
+import { useState } from 'react'
+import useSound from 'use-sound'
+
+interface Animal {
+    id: number
+    name: string
+    image: string
+    alt: string
+    sound:string
+}
+
+interface Props {
+    singleAnimal: Animal
+  }
+
+function AnimalSingle(props: Props) {
+
+    const [count, setCount] = useState(0)
+    const [countss, setCountss] = useState(-155)
+
+
+    const AnimalFart = () => {
+        const [play] = useSound(props.singleAnimal.sound)    
+        const handleFart = () => {
+            play()
+            setCount(count + 1)
+            setCountss(countss + 15)
+        }    
+        return handleFart
+    }
+    
+
+    return (       
+    <div>
+        <p className="butt-rating">Fart rate: <span>{count}</span></p>        
+        <img src={props.singleAnimal.image} alt={props.singleAnimal.alt}></img>
+        <button onClick={AnimalFart()}>Click my butt</button>
+        <img src="/img/fart-cloud.svg" alt="test-butt" className="cloud" style={{bottom:(countss) + '%' }}></img>
+    </div>
+    )
+  }
+  
+  export default AnimalSingle
