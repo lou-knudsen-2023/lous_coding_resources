@@ -1,3 +1,6 @@
+///////////////forms component/////////
+
+
 import { ChangeEvent, useState, FormEvent } from 'react'
 import Formerrors from './Formerrors'
 import { Link, useNavigate } from 'react-router-dom'
@@ -215,3 +218,18 @@ function Form() {
 }
 
 export default Form
+
+
+
+////////////////////////
+// formErrors component
+/////////////////////////////
+
+
+import { Errors } from './Form'
+
+function Formerrors(errors: Errors) {
+  return <p>{Object.values(errors).find((e) => e)}</p>
+}
+
+export default Formerrors
