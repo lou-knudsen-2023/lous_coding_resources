@@ -1,0 +1,238 @@
+//----------------SERVER FOLDER----------------///
+//('index.ts' and 'server.ts' - your server side set up)
+
+//-------------//
+// index.ts //
+//-------------//
+
+import server from './server'
+
+const PORT = process.env.PORT || 3000
+
+server.listen(PORT, function () {
+  // eslint-disable-next-line no-console
+  console.log('Listening on port', PORT)
+})
+
+
+//-------------//
+// server.ts //
+//-------------//
+
+import { join } from 'node:path'
+import express from 'express'
+
+const server = express()
+
+server.use(express.static(join(__dirname, 'public')))
+
+server.get('*', (req, res) => {
+  res.sendFile(join(__dirname, 'public/index.html'))
+})
+
+export default server
+
+
+
+
+
+//**************************** */
+///----------------------SERVER/PUBLIC FOLDER----------------//
+// ----------('Main.CSS' and 'Index.html', plus any other public files e.g. images)
+
+//-------------//
+// index.html //
+//(your front facing html doc)
+//-------------//
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>React!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+  <div id="app"></div>
+  {/* app is your main component that you are linking your html to. 
+  All other components are routed into your App component*/}
+
+  <script src="/bundle.js"></script>
+  {/* your bundle.js folder is where all your TS/JS code is converted into something that your client can read.
+  You shouldnt need to touch this folder, it's a beast. NB you dont need to create this folder, or add things to it. Its automatic.  */}
+</body>
+</html>
+
+
+
+
+
+
+{/* //**************************** */}
+{/* //----------------CLIENT FOLDER----------------///
+//(components folder , 'index.tsx' and 'webpack.config.js' - your client side set up) */}
+
+{/* //-------------//
+// index.TSX //
+//(holds your one event listener to render your app page)
+//-------------// */}
+
+import { createRoot } from 'react-dom/client'
+
+import App from './components/App'
+import { BrowserRouter as Router } from 'react-router-dom'
+{/* you dont have to rename BrowserRouter but convention and possibly some testing considerations recommend you should */}
+
+document.addEventListener('DOMContentLoaded', () => {
+  createRoot(document.getElementById('app') as HTMLElement).render(
+    <Router>
+      <App />
+    </Router>
+  )
+})
+
+
+
+
+{/* //-------------//
+// webpack.config.js //
+//(Webpack configs allow you to configure and extend Webpack's basic functionality. 
+A Webpack config is a JavaScript object that configures one of Webpack's options. 
+Most projects define their Webpack config in a top-level webpack.
+NB: Didnt set this up, so likely included in node module set up)
+//-------------// */}
+
+const { join } = require('node:path')
+
+module.exports = {
+  entry: join(__dirname, './index.tsx'),
+  output: {
+    path: join(__dirname, '../server/public'),
+    filename: 'bundle.js',
+  },
+  mode: 'development',
+  module: {
+    rules: [
+      {
+        test: /\.(j|t)sx?$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+  },
+  devtool: 'source-map',
+}
+
+
+
+
+{/* //-------------//
+// App.tsx //
+//(Your main component that all components link into)
+//-------------// */}
+
+import Centre from './Centre'
+import Home from './Home'
+
+import { Route, Routes } from 'react-router-dom'
+
+function App() {
+  return (
+    <>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/Centre" element={<Centre />} />
+      </Routes>
+      <Footer />
+    </>
+  )
+}
+export default App
+
+
+
+{/* //-------------//
+// App.tsx //
+//(Your main component that all components link into)
+//-------------// */}
+
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+function Centre() {
+  const [horizontal, setHorizontal] = useState(10)
+  const [vertical, setVertical] = useState(200)
+  const navigate = useNavigate()
+
+  console.log(horizontal, vertical)
+
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'ArrowRight' && horizontal <= 430) {
+        setHorizontal(horizontal + 10)
+        {
+          if (horizontal === 270 && vertical === 90) {
+            console.log('fuck yeah')
+            // ADD IN REDIRECT HERE
+            navigate('/Shop')
+          } else if (horizontal >= 410) {
+            navigate('/East')
+          }
+        }
+      } else if (e.key === 'ArrowLeft' && horizontal >= -420) {
+        setHorizontal(horizontal - 10)
+        if (horizontal === 270 && vertical === 90) {
+          console.log('fuck yeah')
+          // ADD IN REDIRECT HERE
+          navigate('/Shop')
+        } else if (horizontal <= -410) {
+          navigate('/West')
+        }
+      } else if (e.key === 'ArrowUp' && vertical >= -20) {
+        setVertical(vertical - 10)
+        if (horizontal === 270 && vertical === 90) {
+          console.log('fuck yeah')
+          // ADD IN REDIRECT HERE
+          navigate('/Shop')
+        } else if (vertical <= -10) {
+          navigate('/North')
+        }
+      } else if (e.key === 'ArrowDown' && vertical <= 390) {
+        setVertical(vertical + 10)
+        if (horizontal === 270 && vertical === 90) {
+          console.log('fuck yeah')
+          // ADD IN REDIRECT HERE
+          navigate('/Shop')
+        } else if (vertical >= 380) {
+          navigate('/South')
+        }
+      }
+    }
+    document.addEventListener('keydown', handleKeyPress)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [horizontal, vertical])
+
+  return (
+    <>
+      <div className="centre-container">
+        <img
+          src="https://i.imgur.com/VHQwkas.gif"
+          alt="character"
+          className="character"
+          style={{ left: horizontal, top: vertical }}
+        />
+      </div>
+    </>
+  )
+}
+
+export default Centre
