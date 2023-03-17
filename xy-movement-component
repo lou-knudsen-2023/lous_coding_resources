@@ -1,0 +1,111 @@
+// COMPONENT //
+
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+function Centre() {
+  const [horizontal, setHorizontal] = useState(10)
+  // is the starting position on the left to right scale
+  const [vertical, setVertical] = useState(200)
+   // is the starting position on the top to bottom scale
+  const navigate = useNavigate()
+   // is the redirect function we import in, to redirect to another component
+
+  console.log(horizontal, vertical)
+  // will console log the pixel placing of the component everytime it moves
+
+
+  // a few notes about the below function
+  // 'key is pulled from the element object when inspecting the element'
+  // 'ArrowRight' is the value attached to the key key. It is not an arbitrary string. It identifies the action so we can use it in the function.
+  // there is an event listener and a rempve event listener, this is closing the loop to stop 'memory leaks'
+
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'ArrowRight' && horizontal <= 430) {
+        setHorizontal(horizontal + 10)
+        {
+          if (horizontal === 270 && vertical === 90) {
+            console.log('fuck yeah')
+            // ADD IN REDIRECT HERE
+            navigate('/Shop')
+          } else if (horizontal >= 410) {
+            navigate('/East')
+          }
+        }
+      } else if (e.key === 'ArrowLeft' && horizontal >= -420) {
+        setHorizontal(horizontal - 10)
+        if (horizontal === 270 && vertical === 90) {
+          console.log('fuck yeah')
+          // ADD IN REDIRECT HERE
+          navigate('/Shop')
+        } else if (horizontal <= -410) {
+          navigate('/West')
+        }
+      } else if (e.key === 'ArrowUp' && vertical >= -20) {
+        setVertical(vertical - 10)
+        if (horizontal === 270 && vertical === 90) {
+          console.log('fuck yeah')
+          // ADD IN REDIRECT HERE
+          navigate('/Shop')
+        } else if (vertical <= -10) {
+          navigate('/North')
+        }
+      } else if (e.key === 'ArrowDown' && vertical <= 390) {
+        setVertical(vertical + 10)
+        if (horizontal === 270 && vertical === 90) {
+          console.log('fuck yeah')
+          // ADD IN REDIRECT HERE
+          navigate('/Shop')
+        } else if (vertical >= 380) {
+          navigate('/South')
+        }
+      }
+    }
+    document.addEventListener('keydown', handleKeyPress)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [horizontal, vertical])
+  // need to check the purpose of the line above
+
+  return (
+    <>
+      <div className="centre-container">
+        <img
+          src="https://i.imgur.com/VHQwkas.gif"
+          alt="character"
+          className="character"
+          style={{ left: horizontal, top: vertical }}
+        />
+      </div>
+    </>
+  )
+}
+
+export default Centre
+
+
+
+
+// associated className CSS 
+
+.centre-container {
+  width: 900px;
+  height: 500px;
+  border: 1px solid black;
+  background-image: url(https://i.imgur.com/dVp4MNX.png);
+  margin: auto;
+  /* padding-top: 25px; */
+  /* padding-bottom: 25px; */
+}
+
+.character {
+  position: relative;
+  top: 200px;
+  z-index: 1;
+  left: -375px;
+  transform: scale(0.5);
+  /* transform: scaleX(1) */
+}
