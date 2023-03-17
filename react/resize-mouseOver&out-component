@@ -1,0 +1,30 @@
+
+import { useState } from 'react'
+
+function flower() {
+  const [imgSize, setImgSize] = useState(20)
+  return (
+    <div className="flower-container">
+      <img
+        onMouseOver={() => setImgSize(30)}
+        onMouseOut={() => setImgSize(20)}
+        onFocus={() => void 0}
+        onBlur={() => void 0}
+        style={{ width: imgSize + '%' }}
+        className="flower"
+        src="/images/flower.png"
+        alt="cute flower"
+      ></img>
+    </div>
+  )
+}
+
+export default flower
+
+
+// associated CSS
+.flower-container {
+  position: fixed;
+  bottom: 5%;
+  right: 0;
+}
