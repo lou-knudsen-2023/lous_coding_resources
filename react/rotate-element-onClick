@@ -1,0 +1,29 @@
+import { useState } from 'react'
+
+function Sk8er() {
+  const [angle, setAngle] = useState(0)
+  const handleClick = () => {
+    setAngle(angle - 60)
+  }
+  return (
+    <div className="skater-container">
+      <img
+        onClick={handleClick}
+        style={{ transform: `rotate(${angle}deg)` }}
+        className="skater"
+        src="/images/skater.png"
+        alt="cartoon skater boy"
+      ></img>
+    </div>
+  )
+}
+
+export default Sk8er
+
+
+// associated css
+.skater-container {
+  position: fixed;
+  bottom: 40%;
+  right: 50%;
+}
