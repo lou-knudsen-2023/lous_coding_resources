@@ -1,0 +1,5 @@
+  // with function in component - but be mindful of the loop
+  
+  
+  const audio = new Audio('./font-and-images/shop-sound.wav')
+  audio.play()
