@@ -1,0 +1,107 @@
+import SkaterBrain from './SkaterBrain'
+
+function Form() {
+  const [isVisible, setIsVisible] = useState(false)
+  const [skaterBrain, setSkaterBrain] = useState('')
+  const [allThoughts, setAllThoughts] = useState([] as string[])
+
+  const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
+    setSkaterBrain(evt.target.value)
+  }
+
+  const handleSubmit = (evt: FormEvent) => {
+    evt.preventDefault()
+    setAllThoughts([skaterBrain, ...allThoughts])
+    setSkaterBrain('')
+    setIsVisible(true)
+  }
+
+  return (
+    <>
+      <SkaterBrain thought={allThoughts[0]} isVisible={isVisible} />
+
+      <div>
+        <form className="thought thought-container" onSubmit={handleSubmit}>
+          <label htmlFor="thought">watcha thinkin&apos;?</label>
+          <input
+            id="thoughtinput"
+            name="thought"
+            placeholder="eg. drop in..WAPOW! Just get so pitted"
+            onChange={handleChange}
+            value={skaterBrain}
+          ></input>
+          <button>think this, surfer boi</button>
+        </form>
+      </div>
+    </>
+  )
+}
+
+export default Form
+
+
+
+
+//skaterBrain import component
+
+
+
+interface Props {
+  thought: string
+  isVisible: boolean
+}
+
+function SkaterBrain(props: Props) {
+  // function SkaterBrain() {
+  // return <h1 className="skater-thought">{props.thought}</h1>
+  return (
+    <div
+      style={{ visibility: props.isVisible ? 'visible' : 'hidden' }}
+      className="skater-thought-container"
+    >
+      <h1 className="skater-thought">{props.thought}</h1>
+    </div>
+  )
+}
+
+export default SkaterBrain
+
+
+associated CSS for both components
+
+.thought-container{
+  position: fixed;
+  left: 5%;
+  bottom: 5%;
+}
+
+.skater-thought-container {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  background: linear-gradient(0deg, rgba(254,193,86,1) 0%, rgba(241,66,54,1) 100%);
+  padding:20px;
+  border-radius:50%;
+  min-width:100px;
+  min-height:40px;
+  margin:20px;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+.skater-thought:before,
+.skater-thought:after {
+  content:"";
+  background:  rgba(254,193,86,1);
+  border-radius:50%;
+  display:block;
+  position:absolute;
+}
+.skater-thought:before {
+  width:44px;
+  height:44px;
+  top: 90px;
+  left:-20px;
+  box-shadow:-50px 30px 0 -12px rgba(254,193,86,1);
+}
