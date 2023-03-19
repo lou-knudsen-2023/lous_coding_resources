@@ -1,0 +1,70 @@
+// how to sort an array by size
+
+export function sortBySize(arr: string[]): string[] {
+    const arrByLength = [...arr].sort((a, b) => a.length - b.length)
+    return arrByLength
+}
+
+// how to fill an arrays length with one word
+
+export function fillArrayWithBees (arrLength: number): string[] {
+    return Array(arrLength).fill('buzz')
+}
+
+// how to find the longest word in an array 
+
+export function findLongestWord(arrOfWords: string[]): string {
+    let getLongestWord = ""
+    for (let word of arrOfWords) {
+        if (word.length > getLongestWord.length) 
+        getLongestWord = word
+        }
+        return getLongestWord
+    }
+    
+// to return the last item in the array
+
+export function getLastSongPlayed(arr: string[]): string {
+    return arr[arr.length -1]
+}
+
+to return the first number in the array
+
+export function getNextNum(arr: number[]): number {
+    return arr[0]
+}
+
+
+// conditional return. When zero vs return 
+
+export function bottlesOfBeerOnTheWall(bottles: number): string {
+    if (bottles === 0) {
+      return 'No more bottles of beer on the wall'
+    } else {
+      // return `${bottles} bottles of beer on the wall`
+      return bottles + ' bottles of beer on the wall'
+    }
+  }
+  
+
+// ----------- OPTIONAL PARAMS -----------
+
+// sumFrame accepts two balls and returns the sum of the two numbers
+// sometimes there may be a third ball, if there is, add it to the sum
+export function sumFrame(ball1: number, ball2: number, extraBall?: number): number {
+    if (extraBall !== undefined) {
+        return ball1 + ball2 + extraBall}
+            else {return ball1 + ball2} 
+        }
+ 
+        // NB: https://www.educba.com/typescript-optional-parameters/#:~:text=In%20Typescript%2C%20making%20optional%20parameters,must%20and%20compulsory%20to%20pass
+
+
+// addNumbersAndStrings accepts two arguments that can be either a number or a number inside a string
+// the sum of the two arguments should be returned as a number regardless of their original type
+export function addNumbersAndStrings(a:Number | string, b: string | number): number {
+    const ValueA = Number(a)
+    const ValueB = Number(b) 
+    return ValueA + ValueB
+}
+
