@@ -91,3 +91,21 @@ server.get('/artwork/:id', (req, res) => {
 })
 
 module.exports = server
+
+
+
+/////COOL DEFAULT SERVER SET UP FROM YOSAN////
+///(DOESNT INCLUDE ROUTES)////
+import { join } from 'node:path'
+import express from 'express'
+
+const server = express()
+
+server.use(express.json())
+server.use(express.static(join(__dirname, './public')))
+
+server.get('*', (req, res) => {
+    res.sendFile(join(__dirname, 'public', 'index.html'))
+  })
+
+export default server
