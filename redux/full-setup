@@ -1,0 +1,267 @@
+
+///////////////////////////////////////////////////////
+/////////////// CLIENT FOLDER ////////////////////// 
+//////////////HOOKS.TS
+
+import { useDispatch, useSelector } from 'react-redux'
+import type { TypedUseSelectorHook } from 'react-redux'
+import type { RootState, AppDispatch } from './store'
+
+// Use throughout your app instead of plain `useDispatch` and `useSelector`
+export const useAppDispatch: () => AppDispatch = useDispatch
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
+
+
+
+
+
+//////////////INDEX.TSX
+
+import { createRoot } from 'react-dom/client'
+import { Provider } from 'react-redux'
+import { store } from './store'
+
+import App from './components/App'
+
+document.addEventListener('DOMContentLoaded', () => {
+  createRoot(document.getElementById('app') as HTMLElement).render(
+    <Provider store={store}>
+      <App />
+    </Provider>
+  )
+})
+
+
+
+
+
+//////////////STORE.TS
+
+import { legacy_createStore as createStore } from 'redux'
+import { devToolsEnhancer } from '@redux-devtools/extension'
+
+import reducers from './reducers'
+
+const store = createStore(reducers, devToolsEnhancer())
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch
+
+export { store }
+
+
+///////////////////////////////////////////////////////
+/////////////// ACTION FOLDER ////////////////////// 
+//////////////INDEX.TS
+
+
+interface UpdateDetails {
+  orgName: string; 
+  newName: string
+}
+
+export type WombatAction =
+  | { type: 'ADD_WOMBAT'; payload: string }
+  | { type: 'DEL_WOMBAT'; payload: string }
+  | { type: 'UPDATE_WOMBAT'; payload: UpdateDetails }
+
+  
+  export function addWombat(name: string): WombatAction {
+    return {
+      type: 'ADD_WOMBAT',
+      payload: name
+    }
+}
+
+export function delWombat(name: string): WombatAction {
+  return {
+    type: 'ADD_WOMBAT',
+    payload: name
+  }
+}
+
+export function updateWombat(orgName: string, newName: string): WombatAction {
+  return {
+    type: 'UPDATE_WOMBAT',
+    payload: { orgName, newName }
+  }
+}
+
+
+////////////////////////////////////////////////////////
+/////////////// COMPONENTS FOLDER ////////////////////// 
+//  APP.TSX (IMPORTING ONLY COMPONENTS)
+
+// import { useAppSelector } from '../hooks'
+import Wombats from './Wombats'
+import AddWombat from '../components/AddWombat'
+
+function App() {
+
+
+// const newWombat = useAppSelector ((globalState) => {
+//   return globalState.wombatsAdd
+// })
+
+  return (
+    <div>
+      <Wombats />
+      <AddWombat />
+    </div>
+  )
+}
+
+export default App
+
+
+
+
+
+
+// WOMBAT COMPONENT 
+// this component only feeds into Wombats. 
+//sets up the interface for one Wombat
+
+
+interface Props {
+  name: string
+}
+
+function Wombat(props: Props) {
+  const wombat = props.name
+
+  return <div>{wombat}</div>
+}
+
+export default Wombat
+
+
+
+
+
+// WOMBATS COMPONENT
+import { useAppSelector } from '../hooks'
+import Wombat from './Wombat'
+// import AddAWombat from './AddWombat'
+
+// the Wombats function takes the wombat component and feeds it into this one.
+
+function Wombats() {
+  const wombats = useAppSelector((state) => state.wombats)
+
+  return (
+    <div>
+      <h1>Wombats</h1>
+      <ul>
+        {wombats.map((wombat) => (
+          <li key={wombat}>
+            <Wombat name={wombat} />
+          </li>
+        ))}
+      </ul>
+      
+    </div>
+  )
+}
+
+export default Wombats
+
+
+
+
+
+
+
+/// ADD WOMBAT COMPONENT /////////
+
+
+import { ChangeEvent, FormEvent, useState } from "react";
+import { addWombat } from '../actions/index'
+import { useAppDispatch } from "../hooks"
+
+
+export default function AddAWombat () {
+  
+  const [name, setNewName] = useState("")
+
+  const dispatch = useAppDispatch()
+  
+  const handleAdd = (evt: ChangeEvent<HTMLInputElement>) => {
+    setNewName(evt.target.value)
+  }
+    
+    const onSubmit = (evt: FormEvent) => {
+      evt.preventDefault()
+      dispatch(addWombat(name))
+      setNewName('')
+    }
+ 
+  return (
+
+    <form onSubmit={onSubmit}>
+      <div> 
+        <label htmlFor="wName">Type a new wombat name...</label>
+        <input id="wName" name="name" type="text" value={name} onChange={handleAdd}></input>
+      </div>
+        <br></br>
+      <div>
+        <button>Submit wombat name</button>
+      </div>  
+    </form>
+    )
+    }
+    
+    //????? type="submit" = The <input type="submit"> defines a submit button which submits all form values to a form-handler. The form-handler is typically a server page with a script for processing the input data. 
+    //The form-handler is specified in the form's action attribute.
+    
+    
+    
+    
+
+////////////////////////////////////////////////////////    
+//////////////// REDUCERS FOLDER //////////////
+    ///////////INDEX.TS 
+    
+    import { combineReducers } from 'redux'
+
+import wombatsReducer from './wombats'
+
+const reducer = combineReducers({
+  wombats: wombatsReducer,
+})
+
+export default reducer
+
+
+
+///////////////WOMBATS.TS
+
+import { WombatAction } from '../actions'
+
+const initialWombatState = ['Gertrude', 'Bartholemew']
+
+const wombatReducer = (
+  state = initialWombatState,
+  action: WombatAction
+): string[] => {
+  const { type, payload } = action
+  switch (type) {
+    case 'ADD_WOMBAT':
+      return [...state, payload]
+    case 'DEL_WOMBAT':
+      return state.filter((wombat) => wombat !== payload)
+    case 'UPDATE_WOMBAT':
+      return state.map((wombat) => 
+      wombat === payload.orgName ? payload.newName : wombat 
+      )
+
+    default:
+      return state
+  }
+}
+
+export default wombatReducer
+
+
+
+
+
